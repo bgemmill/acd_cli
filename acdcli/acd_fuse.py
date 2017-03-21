@@ -552,6 +552,8 @@ class ACDFuse(LoggingMixIn, Operations):
                                                  xattrs_str)
                 except (RequestError, IOError) as e:
                     logger.error('Error writing node xattrs "%s". %s' % (node_id, str(e)))
+                    try: del self.xattr_cache[node_id]
+                    except: pass
                 else:
                     self.cache.insert_property(node_id, self.acd_client_owner, _XATTR_PROPERTY_NAME, xattrs_str)
                 self.xattr_dirty.discard(node_id)
