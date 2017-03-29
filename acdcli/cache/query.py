@@ -193,6 +193,7 @@ class QueryMixin(object):
             return n.id
 
     def resolve(self, path: str, trash=False) -> 'Union[Node|None]':
+        path = path.rstrip('/')
         with self.node_cache_lock:
             try:
                 return self.get_node(self.path_to_node_id_cache[path])
@@ -304,6 +305,8 @@ class QueryMixin(object):
 
         """If the caller provides the folder_path, we can add all the children to the
         path->node_id cache for faster lookup after a directory listing"""
+        if folder_path:
+            folder_path = folder_path.rstrip('/')
         with self.node_cache_lock:
             for c in folders + files:
                 if c.is_available:
@@ -332,7 +335,7 @@ class QueryMixin(object):
 
     def all_path(self, node_id: str, path_suffix=None) -> 'List[str]':
         if node_id == self.root_id:
-            return ["/" + path_suffix]
+            return ['/' + path_suffix]
 
         n = self.get_node(node_id)
         if not n:
