@@ -1,3 +1,7 @@
++-----------------------------------------------------------------------------+
+|**Please be aware that your private data may end up visible to other users.**|
++-----------------------------------------------------------------------------+
+
 |Donate| |Gitter| |PyVersion| |Status| |License| |Build| |PyPiVersion|
 
 acd\_cli
