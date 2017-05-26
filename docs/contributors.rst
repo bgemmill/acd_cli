@@ -23,9 +23,9 @@ Thanks to
 
 - `memoz <https://github.com/memoz>`_ for amending proxy documentation
 
-- `gerph <https://github.com/gerph>`_ for making file searches faster, particularly on large repositories
-
 - `bgemmill <https://github.com/bgemmill>`_ for fuse write-back caching, xattrs, symlinks, and rsync support
+
+- `gerph <https://github.com/gerph>`_ for making file searches faster, particularly on large repositories
 
 Also thanks to
 

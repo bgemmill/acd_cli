@@ -29,7 +29,7 @@ def create_handler(path: str):
 
 
 class OAuthHandler(AuthBase):
-    OAUTH_DATA_FILE = 'oauth_data'
+    OAUTH_DATA_FILE = 'oauth.json'
 
     class KEYS(object):
         EXP_IN = 'expires_in'
@@ -160,7 +160,7 @@ class OAuthHandler(AuthBase):
 
 
 class AppspotOAuthHandler(OAuthHandler):
-    APPSPOT_URL = 'https://tensile-runway-92512.appspot.com/'
+    APPSPOT_URL = 'https://acd-api-oa.appspot.com/'
 
     def __init__(self, path):
         super().__init__(path)
