@@ -133,25 +133,16 @@ def _3_to_4(conn):
         # properties in some of them. It's not clear how to do that from here aside from dropping all data.
         'CREATE TABLE IF NOT EXISTS properties (id VARCHAR(50) NOT NULL, owner TEXT NOT NULL, '
         'key TEXT NOT NULL, value TEXT, PRIMARY KEY (id, owner, key), FOREIGN KEY(id) REFERENCES nodes (id));'
-
-        'CREATE INDEX IF NOT EXISTS ix_parentage_child ON parentage(child);'
-        'CREATE INDEX IF NOT EXISTS ix_parentage_parent ON parentage(parent);'
-        # Having changed the schema, the queries can be optimised differently.
-        # In order to be aware of that, re-analyze the type of data and indexes,
-        # allowing SQLite3 to make better decisions.
-        'ANALYZE;'
-        'PRAGMA user_version = 3;'
-    )
-
-    conn.executescript(
+        
         'ALTER TABLE files ADD version BIGINT;'
-
         'DROP TABLE IF EXISTS content;'
         'CREATE TABLE content (id VARCHAR(50) NOT NULL, value BLOB, size BIGINT, version BIGINT, accessed DATETIME,'
         'PRIMARY KEY (id), UNIQUE (id), FOREIGN KEY(id) REFERENCES nodes (id)); '
 
         'CREATE INDEX IF NOT EXISTS ix_content_size ON content(size);'
         'CREATE INDEX IF NOT EXISTS ix_content_accessed ON content(accessed);'
+        'CREATE INDEX IF NOT EXISTS ix_parentage_parent ON parentage(parent);'
+        
         # Having changed the schema, the queries can be optimised differently.
         # In order to be aware of that, re-analyze the type of data and indexes,
         # allowing SQLite3 to make better decisions.
