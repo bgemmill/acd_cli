@@ -926,7 +926,6 @@ class ACDFuse(LoggingMixIn, Operations):
         fh = self.create(target, None)
         node_id = self.fh_to_node[fh]
         self._setxattr(node_id, _XATTR_MODE_OVERRIDE_NAME, stat.S_IFLNK | 0o0777)
-        # self._setxattr(node_id, _XATTR_SYMLINK_OVERRIDE_NAME, source)
         self.write(target, source_bytes, 0, fh)
         self.release(target, fh)
         return 0
@@ -937,18 +936,6 @@ class ACDFuse(LoggingMixIn, Operations):
             raise FuseOSError(errno.ENOENT)
 
         source = None
-
-        # amazon reduced property size (all our xattr space) to 500 characters or less,
-        # so we're moving symlinks to file bodies.
-        try: source = self._getxattr(node.id, _XATTR_SYMLINK_OVERRIDE_NAME)
-        except: pass
-        if source is not None:
-            logger.debug("readlink: upgrading node: %s path: %s" % (node.id, path))
-            source_bytes = source.encode('utf-8')
-            fh = self.open(path, 0)
-            self.write(path, source_bytes, 0, fh)
-            self.release(path, fh)
-            self._removexattr(node.id, _XATTR_SYMLINK_OVERRIDE_NAME)
 
         if source is None:
             source_bytes = self.cache.get_content(node.id, node.version)
