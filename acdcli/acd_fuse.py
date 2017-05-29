@@ -56,9 +56,9 @@ _XATTR_UID_OVERRIDE_NAME = 'fuse.uid'
 _XATTR_GID_OVERRIDE_NAME = 'fuse.gid'
 _XATTR_SYMLINK_OVERRIDE_NAME = 'fuse.symlink'
 _XATTR_DELAY = 2  # seconds to wait for additional xattr changes before flushing to amazon
-_FS_BLOCK_SIZE = io.DEFAULT_BUFFER_SIZE  # for stat and statfs calls. Needs to be consistent and may affect read sizes from fuse
 
 _def_conf = configparser.ConfigParser()
+_def_conf['fs'] = dict(block_size=io.DEFAULT_BUFFER_SIZE)
 _def_conf['read'] = dict(open_chunk_limit=10, timeout=5, cache_small_file_size=1024)
 _def_conf['write'] = dict(buffer_size=int(1e9), timeout=30)
 
@@ -347,6 +347,7 @@ class ACDFuse(LoggingMixIn, Operations):
         self.acd_client_owner = self.cache.KeyValueStorage.get(CacheConsts.OWNER_ID)
         autosync = kwargs['autosync']
         conf = kwargs['conf']
+        self.conf = conf
 
         self.rp = ReadProxy(self.acd_client,
                             conf.getint('read', 'open_chunk_limit'), conf.getint('read', 'timeout'))
@@ -458,7 +459,7 @@ class ACDFuse(LoggingMixIn, Operations):
             return dict(st_mode=mode,
                         st_nlink=self.cache.num_parents(node.id) if self.nlinks else 1,
                         st_size=size,
-                        st_blksize=_FS_BLOCK_SIZE,
+                        st_blksize=self.conf.getint('fs', 'block_size'),
                         st_blocks=(size + 511) // 512,  # this field always expects a 512 block size
                         **attrs)
 
@@ -600,12 +601,13 @@ class ACDFuse(LoggingMixIn, Operations):
     def statfs(self, path) -> dict:
         """Gets some filesystem statistics as specified in :manpage:`statfs(2)`."""
 
-        return dict(f_bsize=_FS_BLOCK_SIZE,
-                    f_frsize=_FS_BLOCK_SIZE,
-                    f_blocks=self.total // _FS_BLOCK_SIZE,  # total no of blocks
-                    f_bfree=self.free // _FS_BLOCK_SIZE,  # free blocks
-                    f_bavail=self.free // _FS_BLOCK_SIZE,
-                    f_namemax=256  # from amazon's spec
+        bs = self.conf.getint('fs', 'block_size')
+        return dict(f_bsize=bs,
+                    f_frsize=bs,
+                    f_blocks=self.total // bs,  # total no of blocks
+                    f_bfree=self.free // bs,  # free blocks
+                    f_bavail=self.free // bs,
+                    f_namemax=256
                     )
 
     def mkdir(self, path, mode):
